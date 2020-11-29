@@ -265,7 +265,7 @@ func (s *Spinner) Active() bool {
 }
 
 // Start will start the indicator.
-func (s *Spinner) Start(w io.Writer, format string, a ...interface{}) {
+func (s *Spinner) Start() {
 	s.mu.Lock()
 	if s.active {
 		s.mu.Unlock()
@@ -299,14 +299,15 @@ func (s *Spinner) Start(w io.Writer, format string, a ...interface{}) {
 					var outColor string
 					if runtime.GOOS == "windows" {
 						if s.Writer == os.Stderr {
-							outColor = fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.chars[i], s.Suffix)
+							outColor = fmt.Sprintf("%v ", s.color(s.chars[i]))
 						} else {
-							outColor = fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.color(s.chars[i]), s.Suffix)
+							outColor = fmt.Sprintf("%v ", s.color(s.chars[i]))
 						}
 					} else {
-						outColor = fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.color(s.chars[i]), s.Suffix)
+						//outColor = fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.color(s.chars[i]), s.Suffix)
+						outColor = fmt.Sprintf("%v ", s.color(s.chars[i]))
 					}
-					outPlain := fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.chars[i], s.Suffix)
+					outPlain := fmt.Sprintf("%v% ",s.chars[i])
 					fmt.Fprint(s.Writer, outColor)
 					s.lastOutput = outPlain
 					delay := s.Delay
@@ -342,9 +343,9 @@ func (s *Spinner) Stop() {
 }
 
 // Restart will stop and start the indicator.
-func (s *Spinner) Restart(w io.Writer, format string, a ...interface{}) {
+func (s *Spinner) Restart() {
 	s.Stop()
-	s.Start(w, format, a)
+	s.Start()
 }
 
 // Reverse will reverse the order of the slice assigned to the indicator.
