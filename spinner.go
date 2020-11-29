@@ -266,6 +266,8 @@ func (s *Spinner) Active() bool {
 
 // Start will start the indicator.
 func (s *Spinner) Start() {
+	//fmt.Println("alonyb")
+	fmt.Printf("alonybF ")
 	s.mu.Lock()
 	if s.active {
 		s.mu.Unlock()
@@ -278,7 +280,7 @@ func (s *Spinner) Start() {
 	s.active = true
 	s.mu.Unlock()
 
-	go func() {
+	func() {
 		for {
 			for i := 0; i < len(s.chars); i++ {
 				select {
@@ -307,7 +309,7 @@ func (s *Spinner) Start() {
 						//outColor = fmt.Sprintf("\r%v%v%v%s%s ", w, format, a, s.color(s.chars[i]), s.Suffix)
 						outColor = fmt.Sprintf("%v ", s.color(s.chars[i]))
 					}
-					outPlain := fmt.Sprintf("%v% ",s.chars[i])
+					outPlain := fmt.Sprintf("%v ",s.chars[i])
 					fmt.Fprint(s.Writer, outColor)
 					s.lastOutput = outPlain
 					delay := s.Delay
@@ -403,7 +405,6 @@ func (s *Spinner) erase() {
 	for _, c := range []string{"\b", "\127", "\b", "\033[K"} { // "\033[K" for macOS Terminal
 		fmt.Fprint(s.Writer, strings.Repeat(c, n))
 	}
-	fmt.Fprintf(s.Writer, "\r\033[K") // erases to end of line
 	s.lastOutput = ""
 }
 

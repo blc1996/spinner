@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 func main() {
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
 	s.Color("red")                                              // Set the spinner color to red
+	fmt.Printf("%s", "alonyb main")
 	s.Start()                                                   // Start the spinner
 	time.Sleep(4 * time.Second)                                 // Run for some time to simulate work
 
