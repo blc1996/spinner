@@ -277,7 +277,6 @@ func (s *Spinner) Start() {
 	}
 	s.active = true
 	s.mu.Unlock()
-
 	go func() {
 		for {
 			for i := 0; i < len(s.chars); i++ {
@@ -307,11 +306,7 @@ func (s *Spinner) Start() {
 						outColor = fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
 					}
 					outPlain := fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
-					if i == len(s.chars) - 2 {
-						fmt.Fprint(s.Writer, outColor, "\n")
-					} else {
-						fmt.Fprint(s.Writer, outColor)
-					}
+					fmt.Fprint(s.Writer, outColor)
 					s.lastOutput = outPlain
 					delay := s.Delay
 
@@ -329,6 +324,7 @@ func (s *Spinner) Start() {
 
 // Stop stops the indicator.
 func (s *Spinner) Stop() {
+	defer fmt.Print("\n")
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.active {
