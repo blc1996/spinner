@@ -307,7 +307,11 @@ func (s *Spinner) Start() {
 						outColor = fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
 					}
 					outPlain := fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
-					fmt.Fprint(s.Writer, outColor)
+					if i == len(s.chars) - 2 {
+						fmt.Fprint(s.Writer, outColor, "\n")
+					} else {
+						fmt.Fprint(s.Writer, outColor)
+					}
 					s.lastOutput = outPlain
 					delay := s.Delay
 
@@ -402,9 +406,6 @@ func (s *Spinner) erase() {
 	for _, c := range []string{"\b", "\127", "\b", "\033[K"} { // "\033[K" for macOS Terminal
 		fmt.Fprint(s.Writer, strings.Repeat(c, n))
 	}
-	//if n > 4 {
-	//	fmt.Fprintf(s.Writer, "\r\033[K") // erases to end of line
-	//}
 	s.lastOutput = ""
 }
 
