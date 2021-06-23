@@ -97,6 +97,9 @@ var validColors = map[string]bool{
 	"bgHiWhite":   true,
 }
 
+// returns true if the OS is windows and the WT_SESSION env variable is set.
+var isWindowsTerminalOnWindows = len(os.Getenv("WT_SESSION")) > 0 && runtime.GOOS == "windows"
+
 // returns a valid color's foreground text color attribute
 var colorAttributeMap = map[string]color.Attribute{
 	// default colors for backwards compatibility
@@ -285,13 +288,13 @@ func (s *Spinner) Start() {
 		s.mu.Unlock()
 		return
 	}
-	if s.HideCursor && runtime.GOOS != "windows" {
+	if s.HideCursor && !isWindowsTerminalOnWindows {
 		// hides the cursor
-		fmt.Print("\033[?25l")
+		fmt.Fprint(s.Writer, "\033[?25l")
 	}
 	s.active = true
 	s.mu.Unlock()
-	go func() {
+	func() {
 		for {
 			for i := 0; i < len(s.chars); i++ {
 				select {
@@ -303,7 +306,9 @@ func (s *Spinner) Start() {
 						s.mu.Unlock()
 						return
 					}
-					s.erase()
+					if !isWindowsTerminalOnWindows {
+						s.erase()
+					}
 
 					if s.PreUpdate != nil {
 						s.PreUpdate(s)
@@ -320,7 +325,8 @@ func (s *Spinner) Start() {
 						outColor = fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
 					}
 					outPlain := fmt.Sprintf("%s%s ", s.chars[i], s.Suffix)
-					fmt.Fprint(s.Writer, outColor)
+					fmt.Fprint(s.Writer, outColor,"\033[2J")
+					fmt.Print()
 					s.lastOutput = outPlain
 					delay := s.Delay
 
@@ -343,13 +349,17 @@ func (s *Spinner) Stop() {
 	defer s.mu.Unlock()
 	if s.active {
 		s.active = false
-		if s.HideCursor && runtime.GOOS != "windows" {
+		if s.HideCursor && !isWindowsTerminalOnWindows {
 			// makes the cursor visible
-			fmt.Print("\033[?25h")
+			fmt.Fprint(s.Writer, "\033[?25h")
 		}
 		s.erase()
 		if s.FinalMSG != "" {
-			fmt.Fprint(s.Writer, s.FinalMSG)
+			if isWindowsTerminalOnWindows {
+				fmt.Fprint(s.Writer, "\r", s.FinalMSG)
+			} else {
+				fmt.Fprint(s.Writer, s.FinalMSG)
+			}
 		}
 		s.stopChan <- struct{}{}
 	}
@@ -407,9 +417,13 @@ func (s *Spinner) UpdateCharSet(cs []string) {
 // Caller must already hold s.lock.
 func (s *Spinner) erase() {
 	n := utf8.RuneCountInString(s.lastOutput)
-	for _, c := range []string{"\b", "\127", "\b", "\033[K"} { // "\033[K" for macOS Terminal
-		fmt.Fprint(s.Writer, strings.Repeat(c, n))
+	if runtime.GOOS == "windows" && !isWindowsTerminalOnWindows {
+		clearString := "\r" + strings.Repeat(" ", n) + "\r"
+		fmt.Fprint(s.Writer, clearString)
+		s.lastOutput = ""
+		return
 	}
+	fmt.Fprintf(s.Writer, "\033[K") // erases to end of line
 	s.lastOutput = ""
 }
 
