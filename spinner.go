@@ -406,9 +406,19 @@ func (s *Spinner) UpdateCharSet(cs []string) {
 // Caller must already hold s.lock.
 func (s *Spinner) erase() {
 	n := utf8.RuneCountInString(s.lastOutput)
-	for _, c := range []string{"\b", "\127", "\b", "\033[K"} { // "\033[K" for macOS Terminal
-		fmt.Fprint(s.Writer, strings.Repeat(c, n))
+	if runtime.GOOS == "windows" && !isWindowsTerminalOnWindows {
+		clearString := "\r" + strings.Repeat(" ", n) + "\r"
+		fmt.Fprint(s.Writer, clearString)
+		s.lastOutput = ""
+		return
 	}
+
+	// Taken from https://en.wikipedia.org/wiki/ANSI_escape_code:
+	// \r     - Carriage return - Moves the cursor to column zero
+	// \033[K - Erases part of the line. If n is 0 (or missing), clear from
+	// cursor to the end of the line. If n is 1, clear from cursor to beginning
+	// of the line. If n is 2, clear entire line. Cursor position does not
+	// change.
 	fmt.Fprintf(s.Writer, "\r\033[K")
 	s.lastOutput = ""
 }
