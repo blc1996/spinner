@@ -419,7 +419,7 @@ func (s *Spinner) erase() {
 	// cursor to the end of the line. If n is 1, clear from cursor to beginning
 	// of the line. If n is 2, clear entire line. Cursor position does not
 	// change.
-	fmt.Fprintf(s.Writer, "\r\033[K")
+	fmt.Fprintf(s.Writer, "\033[K")
 	s.lastOutput = ""
 }
 
