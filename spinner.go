@@ -339,7 +339,6 @@ func (s *Spinner) Start() {
 // Stop stops the indicator.
 func (s *Spinner) Stop() {
 	s.mu.Lock()
-	defer fmt.Print("\n")
 	defer s.mu.Unlock()
 	if s.active {
 		s.active = false
