@@ -266,9 +266,9 @@ func (s *Spinner) Active() bool {
 }
 
 func isTerminal() bool {
-	if isatty.IsTerminal(os.Stdout.Fd()){
+	if isatty.IsTerminal(os.Stdout.Fd()) {
 		return true
-	} else if isatty.IsCygwinTerminal(os.Stdout.Fd()){
+	} else if isatty.IsCygwinTerminal(os.Stdout.Fd()) {
 		return true
 	}
 	return false
@@ -277,7 +277,7 @@ func isTerminal() bool {
 // Start will start the indicator.
 func (s *Spinner) Start() {
 	if !isTerminal() {
-		fmt.Printf("\n")
+		fmt.Printf("only works with terminal\n")
 		return
 	}
 	s.mu.Lock()
